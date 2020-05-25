@@ -1,0 +1,14 @@
+/*@!Encoding:1252*/
+variables
+{
+  struct door
+  {
+    int  door_status ; //    0 open   ---- 1 close
+    int door_lock_status; // 0 unlock ---- 1 lock
+  };
+  struct door dr_door, as_door, rear_left_door, rear_right_door ;
+}
+on start
+{
+  
+}

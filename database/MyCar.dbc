@@ -1,0 +1,98 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Doors Light Engine
+VAL_TABLE_ Door_status 3 "Not_Available" 2 "Open_Unlock" 1 "Close_Lock" 0 "Close_Unlock" ;
+VAL_TABLE_ gear_position 6 "fifth_gear" 5 "forth_gear" 4 "third_gear" 3 "second_gear" 2 "first_gear" 1 "reverse" 0 "Not_available" ;
+VAL_TABLE_ key_position 3 "Start" 2 "On" 1 "Acc" 0 "Off" ;
+
+
+BO_ 4 MsgLevel: 2 Engine
+ SG_ Sig_temp : 8|8@1- (1,0) [0|120] "" Vector__XXX
+ SG_ Sig_oil : 0|8@1- (1,0) [0|100] "percentage" Vector__XXX
+
+BO_ 3 MsgWarning: 3 Engine
+ SG_ Sig_warning_temp : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_warning_oil : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 0 MsgDoorsStatus: 5 Doors
+ SG_ Sig_auto_lock : 32|1@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_rear_right_door : 24|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_rear_left_door : 16|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_driver_door : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_assistant_door : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 2 MsgSpeed: 3 Engine
+ SG_ Sig_gear_pos : 16|4@1+ (1,0) [0|6] "" Vector__XXX
+ SG_ Sig_speed : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_rpm : 0|12@1+ (1,0) [0|4500] "" Vector__XXX
+
+BO_ 1 MsgKeyPosition: 1 Engine
+ SG_ Sig_key_position : 0|2@1- (1,0) [0|3] "" Vector__XXX
+
+
+
+BA_DEF_ SG_  "GenSigStartValue" INT 0 0;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgILSupport" ENUM  "No","Yes";
+BA_DEF_ BU_  "ILUsed" ENUM  "No","Yes";
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","ifActive","NoMsgSendType";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgILSupport" "No";
+BA_DEF_DEF_  "ILUsed" "No";
+BA_DEF_DEF_  "GenMsgSendType" "Cyclic";
+BA_DEF_DEF_  "BusType" "CAN";
+BA_ "ILUsed" BU_ Engine 1;
+BA_ "GenMsgILSupport" BO_ 4 1;
+BA_ "GenMsgCycleTime" BO_ 4 500;
+BA_ "GenMsgILSupport" BO_ 3 1;
+BA_ "GenMsgCycleTime" BO_ 3 500;
+BA_ "GenMsgILSupport" BO_ 0 1;
+BA_ "GenMsgCycleTime" BO_ 0 500;
+BA_ "GenMsgILSupport" BO_ 2 1;
+BA_ "GenMsgCycleTime" BO_ 2 200;
+BA_ "GenMsgILSupport" BO_ 1 1;
+BA_ "GenMsgCycleTime" BO_ 1 500;
+BA_ "GenSigStartValue" SG_ 2 Sig_gear_pos 0;
+BA_ "GenSigStartValue" SG_ 2 Sig_speed 0;
+VAL_ 0 Sig_rear_right_door 3 "Not_Available" 2 "Open_Unlock" 1 "Close_Lock" 0 "Close_Unlock" ;
+VAL_ 0 Sig_rear_left_door 3 "Not_Available" 2 "Open_Unlock" 1 "Close_Lock" 0 "Close_Unlock" ;
+VAL_ 0 Sig_driver_door 3 "Not_Available" 2 "Open_Unlock" 1 "Close_Lock" 0 "Close_Unlock" ;
+VAL_ 0 Sig_assistant_door 3 "Not_Available" 2 "Open_Unlock" 1 "Close_Lock" 0 "Close_Unlock" ;
+VAL_ 2 Sig_gear_pos 6 "reverse" 5 "fifth_gear" 4 "forth_gear" 3 "thirs_gear" 2 "second_gear" 1 "first_gear" 0 "Not_available" ;
+VAL_ 1 Sig_key_position 3 "Start" 2 "On" 1 "Acc" 0 "Off" ;
+
