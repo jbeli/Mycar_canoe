@@ -1,0 +1,245 @@
+/*@!Encoding:1252*/
+variables
+{
+  // TIMERS
+  msTimer speed_inc ;
+  msTimer speed_dec ;
+  msTimer oil_per ;
+  msTimer temtimer;
+  msTimer emgstop ;
+  
+  
+  int Temp_max = 80;
+  int speed_step = 5 ;
+  int current_temp ;
+  int per_oil_min = 20 ;
+  int current_per_oil ;
+  float speed = 0 ;
+  long gear_position ;
+  int rpm ;
+}
+on preStart
+{
+  //@Engine::eng_gear_position = 0 ;
+  //@Engine::eng_speed = 0 ;
+  //@Engine::eng_rpm = 0 ;
+  @Engine::eng_oil_level = 100 ;
+  @Engine::eng_temp = 0 ;
+  @Engine::auto = 0 ;
+  @Warning::war_oil = 0 ;
+  @Warning::war_temp = 0 ;
+  
+}
+on key 'a'
+{
+  setSignal(Sig_gear_pos, 0);
+}
+on start
+{
+  current_temp = 10 ;
+  current_per_oil = 100 ;
+  //setSignal(Sig_gear_pos, 0);
+  
+  if (@Engine::auto == 1)
+  {
+    setTimer(speed_inc, 1000);
+  }
+  setTimer(oil_per, 500);
+  setSignal(Sig_gear_pos, 0);
+}
+on sysvar_update Engine::auto
+{
+  if (@this==1 && @Engine::eng_key_position ==3 )
+  {
+    setTimer(speed_inc, 1000);
+  }
+  else
+  {
+    cancelTimer(speed_inc);
+  }
+}
+on sysvar_update Engine::eng_oil_level
+{
+  setSignal(Sig_oil, @this);
+  if (@this <per_oil_min )
+  {
+    sysSetVariableInt(sysvar::Warning::war_oil,1);
+    setSignal(Sig_warning_oil, 1);
+    setTimer(emgstop,100); 
+    //speed = decrease_speed(speed,20);
+    
+  }
+  else
+  {
+    sysSetVariableInt(sysvar::Warning::war_oil,0);
+    setSignal(Sig_warning_oil, 0);
+  }
+}
+on timer emgstop
+{
+  if (@Engine::eng_oil_level <10)
+  {
+    cancelTimer(speed_inc) ;
+    cancelTimer(oil_per);
+    while (speed !=0)
+    {
+      speed = decrease_speed(speed,20);
+      gear_position = set_gear_pos(speed);
+      rpm = (speed *100 )/gear_position ;
+      
+      sysSetVariableInt(sysvar::Engine::eng_gear_position,gear_position );
+      sysSetVariableInt(sysvar::Engine::eng_speed,speed );
+      sysSetVariableInt(sysvar::Engine::eng_rpm,rpm );
+      
+      
+      setSignal(Sig_gear_pos, gear_position);
+      setSignal(Sig_speed, speed) ;
+      setSignal(Sig_rpm, rpm) ;
+    }
+  }
+  setTimer(emgstop,50);
+}
+on timer oil_per
+{
+  if (@Engine::auto == 1 && @Engine::eng_key_position ==3)
+  {
+    current_per_oil -=  5 ;
+    setSignal(Sig_oil, current_per_oil);
+    sysSetVariableInt(sysvar::Engine::eng_oil_level,current_per_oil);
+    
+  }
+  
+  setTimer(oil_per, 2000);
+}
+on timer speed_inc
+{
+  if (@Engine::eng_key_position ==3)
+  {
+    speed = increment_speed(speed, speed_step) ;
+    gear_position = set_gear_pos(speed);
+    rpm = (speed *100 )/gear_position ;
+    
+    sysSetVariableInt(sysvar::Engine::eng_gear_position,gear_position );
+    sysSetVariableInt(sysvar::Engine::eng_speed,speed );
+    sysSetVariableInt(sysvar::Engine::eng_rpm,rpm );
+    
+    
+    setSignal(Sig_gear_pos, gear_position);
+    setSignal(Sig_speed, speed) ;
+    setSignal(Sig_rpm, rpm) ;
+     
+    
+    setTimer(speed_inc, 1000);
+  }
+  
+}
+
+on timer speed_dec
+{
+  decrease_speed(speed, 5);
+  gear_position = set_gear_pos(speed);
+  rpm = (speed *100 )/gear_position ;
+  
+  sysSetVariableInt(sysvar::Engine::eng_gear_position,gear_position );
+  sysSetVariableInt(sysvar::Engine::eng_speed,speed );
+  sysSetVariableInt(sysvar::Engine::eng_rpm,rpm );
+  
+  
+  setSignal(Sig_gear_pos, gear_position);
+  setSignal(Sig_speed, speed) ;
+  setSignal(Sig_rpm, rpm) ;
+
+}
+on sysvar_update Engine::eng_speed
+{
+  if (@Engine::auto == 0)
+  {
+    speed = @Engine::eng_speed ;
+    gear_position = set_gear_pos(speed);
+    rpm = (speed *100 )/gear_position ;
+    
+    sysSetVariableInt(sysvar::Engine::eng_gear_position,gear_position );
+    sysSetVariableInt(sysvar::Engine::eng_rpm,rpm );
+    
+    setSignal(Sig_gear_pos, gear_position);
+    setSignal(Sig_speed, speed) ;
+    setSignal(Sig_rpm, rpm) ;
+  }
+}
+
+on sysvar_update Engine::eng_key_position
+{
+  if (@this !=3)
+  {
+    sysSetVariableInt(sysvar::Engine::eng_gear_position,0 );
+    sysSetVariableInt(sysvar::Engine::eng_speed,0 );
+    sysSetVariableInt(sysvar::Engine::eng_rpm,0 );
+    
+    setSignal(Sig_gear_pos, 0);
+    setSignal(Sig_speed, 0) ;
+    setSignal(Sig_rpm, 0) ;
+  }
+  else if (@this == 3)
+  {
+    if (@Engine::auto ==1)
+    {
+      speed = 0 ;
+      speed = increment_speed(speed, speed_step) ;
+      gear_position = set_gear_pos(speed);
+      rpm = (speed *100 )/gear_position ;
+      
+      sysSetVariableInt(sysvar::Engine::eng_gear_position,gear_position );
+      sysSetVariableInt(sysvar::Engine::eng_speed,speed );
+      sysSetVariableInt(sysvar::Engine::eng_rpm,rpm );
+      
+      
+      setSignal(Sig_gear_pos, gear_position);
+      setSignal(Sig_speed, speed) ;
+      setSignal(Sig_rpm, rpm) ;
+       
+      
+      setTimer(speed_inc, 1000);
+    }
+  }
+}
+
+/* FUNCTIONS */
+
+float decrease_speed(float fspeed, int fspeed_x)
+{
+  return fspeed -= fspeed_x ;
+}
+
+float increment_speed(float fspeed, int fspeed_x)
+{
+  if (fspeed < 200)
+  {
+    fspeed += fspeed_x ;
+  }
+  return fspeed  ;
+}
+int set_gear_pos (float fspeed)
+{
+  int fgear ;
+  if (fspeed < 10)
+  {
+    fgear = 1 ;
+  }
+  else if (fspeed>= 10 && fspeed < 25)
+  {
+    fgear = 2 ;
+  }
+  else if (fspeed >= 25 && fspeed < 60)
+  {
+    fgear = 3 ;
+  }
+  else if (fspeed >= 60 && fspeed < 90)
+  {
+    fgear = 4 ;
+  }
+  else
+  {
+    fgear = 5 ;
+  }
+  return fgear ;
+}
